@@ -183,21 +183,9 @@ pub mod tcp_functions {
         ) -> Result<Blob, Box<EvalAltResult>> {
             let mut buf: Vec<u8> = Vec::new();
 
-            let max_len = ctx.engine().max_array_size();
-            let res = match max_len {
-                0 if len == 0 => stream.borrow_mut().read_to_end(&mut buf),
-                0 if len > 0 => {
-                    buf.resize(len as usize, 0);
-                    stream.borrow_mut().read(&mut buf)
-                }
-                _ if len == 0 => {
-                    buf.resize(max_len, 0);
-                    stream.borrow_mut().read(&mut buf)
-                }
-                _ => {
-                    buf.resize(max_len.min(len as usize), 0);
-                    stream.borrow_mut().read(&mut buf)
-                }
+            let res = {
+                buf.resize(len as usize, 0);
+                stream.borrow_mut().read(&mut buf)
             };
 
             match res {
